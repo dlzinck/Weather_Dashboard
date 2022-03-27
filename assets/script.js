@@ -15,7 +15,7 @@ let icon;
 //Functions for application
 //This function is designed to retrieve the information stored and add information to the search history using an unordered list and for loop
 function loadCity() {
-    cleaningElement(savedCitiesCont);
+    clearElement(savedCitiesCont);
 
     if(dataStore){
         let ulElement = $("<ul/>");
@@ -63,16 +63,14 @@ function findUV(uv) {
 
 //This function shows the information that is stored current city and five day forcast
 let weatherHTML = function (city, uv) {
-    cleaningElement(selectedCityCont);
-    cleaningElement(forecastCont); 
-
+    clearElement(selectedCityCont);
+    clearElement(forecastCont); 
     let container1 = $("<div/>");
     $(container1).addClass("col-6");
     let container2 = $("<div/>");
     $(container2).addClass("col-6");
     let cityEl = $("<h2/>");
     let imageCurrent = $("<img/>");
-
     $(cityEl).text(city + " (" + weatherCondition[0].dateT +")");
     $(imageCurrent).attr("src", weatherCondition[0].icon);
     $(imageCurrent).addClass("bg-info");
@@ -87,7 +85,6 @@ let weatherHTML = function (city, uv) {
     $(selectedCityCont).append(container1);
     $(selectedCityCont).append(container2);
     $(selectedCityCont).append(container3);
-
     let container6 = $("<div/>");
     $(container6).addClass("row");
     let container7 = $("<div/>");
@@ -126,4 +123,34 @@ let weatherHTML = function (city, uv) {
         $(container8).append(container4);
     }
     $(forecastCont).append(container8);
+};
+
+//This function is designed to store the city
+function saveCity(city) {
+    let flag = false
+    if(dataStore){
+        for(var i = 0; i < dataStore.length; i++){
+            if(dataStore[i] === city){
+                flag = true;
+            }
+        }
+        if(flag){
+            displayAlertMessage("The City: "+city+" already exists");
+        }
+    }
+    if(!flag){
+        dataStore.push(city);
+        localStorage.setItem("cities",JSON.stringify(dataStore));
+    }
+    loadCity();
+}
+
+//This function is designed to search for 0900am
+function search9AM(str) {
+    let hour = str.split(" ")[1].split(":")[0];
+    let flag = false;
+    if(hour === "09"){
+        flag = true;
+    }        
+    return flag;
 };
