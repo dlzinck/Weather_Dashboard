@@ -129,7 +129,7 @@ let weatherHTML = function (city, uv) {
 function saveCity(city) {
     let flag = false
     if(dataStore){
-        for(var i = 0; i < dataStore.length; i++){
+        for (let i = 0; i < dataStore.length; i++){
             if(dataStore[i] === city){
                 flag = true;
             }
@@ -153,4 +153,49 @@ function search9AM(str) {
         flag = true;
     }        
     return flag;
+};
+
+function callApiFetch(city) {
+    let url;
+    if (location.protocol === 'http:') {
+        url = 'http://api.openweathermap.org/data/2.5/forecast?appid=b262298fbe39ad30d243f31f6e1297bc&units=imperial&q='+city;
+     } else {
+        url = 'https://api.openweathermap.org/data/2.5/forecast?appid=b262298fbe39ad30d243f31f6e1297bc&units=imperial&q='+city;
+     }
+    fetch(url)
+    .then(function(weatherResponse) {
+        return weatherResponse.json();
+     })
+    .then(function(weatherResponse) {
+
+        if (weatherResponse.cod != "200") {
+            displayAlertMessage("Unable to find "+ city +" in OpenWeathermap.org");
+            return;
+        } else {
+                createDataObject(weatherResponse.list, weatherResponse.city.coord);
+            }
+            let urlOne;
+        if (location.protocol === 'http:') {
+            urlOne = 'http://api.openweathermap.org/data/2.5/uvi?appid=b262298fbe39ad30d243f31f6e1297bc&lat='+weatherCondition[0].lat+'&lon='+weatherCondition[0].lon;
+        } else {
+            urlOne = 'https://api.openweathermap.org/data/2.5/uvi?appid=b262298fbe39ad30d243f31f6e1297bc&lat='+weatherCondition[0].lat+'&lon='+weatherCondition[0].lon;
+        }
+        fetch(urlOne)
+        .then(function(uvResponse) {
+          return uvResponse.json();
+        })
+        .then(function(uvResponse) {
+          if (!uvResponse) {
+            displayAlertMessage("OpenWeathermap.org could not find information for latitude and longitude");
+            return;
+          } else {
+            saveCity(city);
+            weatherHTML(city, uvResponse.value);
+          }
+        })
+    })
+    .catch(function(error) {
+        displayAlertMessage("We're sorry! We were unable to connect to OpenWeathermap.org");
+        return;
+    });
 };
