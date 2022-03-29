@@ -1,23 +1,26 @@
 //Global variables
-let searchButton = $("#searchButton");
-let savedCitiesCont = $("#savedCities");
-let selectedCityCont = $("#selectedCity");
-let forecastCont = $("#forcast");
+let searchButton = document.querySelector("#searchButton");
+let savedCitiesCont = document.querySelector("#savedCities");
+let selectedCityCont = document.querySelector("#selectedCity");
+let forecastCont = document.querySelector("#forcast");
 let dataStore = JSON.parse(localStorage.getItem('cities')) || [];
 let condition = [];
 let icon;
     if (location.protocol === 'http:') {
-        icon = 'http://openweathermap.org/img/wn/';
+        icon = 'http://openweathermap.org/img/w/';
      } else {
-        icon = 'https://openweathermap.org/img/wn/';
+        icon = 'https://openweathermap.org/img/w/';
      }
 
 //Functions for application
+function begin() {
+    loadCity();
+}
 //This function is designed to retrieve the information stored and add information to the search history using an unordered list and for loop
 function loadCity() {
     clearElement(savedCitiesCont);
 
-    if(dataStore){
+    if(dataStore) {
         let ulElement = $("<ul/>");
         $(ulElement).addClass("list-unstyled");
         $(ulElement).addClass("w-100");
@@ -34,7 +37,7 @@ function loadCity() {
 $(document).on("click", ".list-group-item", function(event) {
     event.preventDefault();
     let city = $(this).attr("attr");
-    callApiFetch(city);
+    fetchAPI(city);
 });
 
 //This function is designed to clean everything inside the container
@@ -46,13 +49,13 @@ function clearElement(element) {
 function findUV(uv) {
     let indexUV = parseFloat(uv);
     let backgroundColor;
-    if(indexUV < 3){
+    if(indexUV < 3) {
         backgroundColor = "bg-success";
     }
-    else if( indexUV < 6){
+    else if( indexUV < 6) {
         backgroundColor = "bg-warning";
     }
-        else if(indexUV < 8){
+        else if(indexUV < 8) {
                 backgroundColor = "bg-danger";
             }
             else {
@@ -62,7 +65,7 @@ function findUV(uv) {
 };
 
 //This function shows the information that is stored current city and five day forcast
-let weatherHTML = function (city, uv) {
+function weatherHTML(city, uv) {
     clearElement(selectedCityCont);
     clearElement(forecastCont); 
     let container1 = $("<div/>");
@@ -128,17 +131,17 @@ let weatherHTML = function (city, uv) {
 //This function is designed to store the city
 function saveCity(city) {
     let flag = false
-    if(dataStore){
-        for (let i = 0; i < dataStore.length; i++){
+    if(dataStore) {
+        for (let i = 0; i < dataStore.length; i++) {
             if(dataStore[i] === city){
                 flag = true;
             }
         }
-        if(flag){
+        if(flag) {
             displayAlertMessage("The City: "+city+" already exists");
         }
     }
-    if(!flag){
+    if(!flag) {
         dataStore.push(city);
         localStorage.setItem("cities",JSON.stringify(dataStore));
     }
@@ -151,36 +154,38 @@ function search9AM(str) {
     let flag = false;
     if(hour === "09"){
         flag = true;
-    }        
+    }
     return flag;
 };
 
-function callApiFetch(city) {
-    let url;
-    if (location.protocol === 'http:') {
-        url = 'http://api.openweathermap.org/data/2.5/forecast?appid=b262298fbe39ad30d243f31f6e1297bc&units=imperial&q='+city;
-     } else {
-        url = 'https://api.openweathermap.org/data/2.5/forecast?appid=b262298fbe39ad30d243f31f6e1297bc&units=imperial&q='+city;
-     }
+function fetchAPI(city) {
+    let url = 'https://api.openweathermap.org/geo/1.0/direct?q='+city+'&limit=5&appid=cdb0c3916fc6f78da75b1f26c80e2432';
+    // if (location.protocol === 'http:') {
+    //     url = 'https://api.openweathermap.org/geo/1.0/direct?q='+city+'&limit=5&appid=cdb0c3916fc6f78da75b1f26c80e2432';
+    //     console.log(url);
+    //  } else {
+    //     url = 'https://api.openweathermap.org/geo/1.0/direct?q='+city+'&limit=5&appid=cdb0c3916fc6f78da75b1f26c80e2432';
+    //  }
     fetch(url)
+
     .then(function(weatherResponse) {
         return weatherResponse.json();
      })
-    .then(function(weatherResponse) {
-
-        if (weatherResponse.cod != "200") {
-            displayAlertMessage("Unable to find "+ city +" in OpenWeathermap.org");
-            return;
-        } else {
-                createDataObject(weatherResponse.list, weatherResponse.city.coord);
-            }
-            let urlOne;
-        if (location.protocol === 'http:') {
-            urlOne = 'http://api.openweathermap.org/data/2.5/uvi?appid=b262298fbe39ad30d243f31f6e1297bc&lat='+weatherCondition[0].lat+'&lon='+weatherCondition[0].lon;
-        } else {
-            urlOne = 'https://api.openweathermap.org/data/2.5/uvi?appid=b262298fbe39ad30d243f31f6e1297bc&lat='+weatherCondition[0].lat+'&lon='+weatherCondition[0].lon;
-        }
+    .then(function(weather) { 
+        console.log(weather);
+        // if (weather.cod != "200") {
+        //     displayAlertMessage("Unable to find "+ city +" in OpenWeathermap.org");
+        //     return;
+        // } else {
+        createDataObject(weather.list, weather.city.cord);
+        //     }
+        let urlOne ='https://api.openweathermap.org/data/2.5/uvi/forcast?&appid=cdb0c3916fc6f78da75b1f26c80e2432&lat='+weatherCondition[0].lat+'&lon='+weatherCondition[0].lon;
+        // if (location.protocol === 'http:') {
+        //     urlOne = 'https://api.openweathermap.org/data/2.5/uvi/forcast?&appid=cdb0c3916fc6f78da75b1f26c80e2432&lat='+weatherCondition[0].lat+'&lon='+weatherCondition[0].lon;
+        // } else {
+        //     urlOne = 'https://api.openweathermap.org/data/2.5/uvi/forecast?&appid=cdb0c3916fc6f78da75b1f26c80e2432&lat='+weatherCondition[0].lat+'&lon='+weatherCondition[0].lon;
         fetch(urlOne)
+
         .then(function(uvResponse) {
           return uvResponse.json();
         })
@@ -194,8 +199,66 @@ function callApiFetch(city) {
           }
         })
     })
-    .catch(function(error) {
-        displayAlertMessage("We're sorry! We were unable to connect to OpenWeathermap.org");
-        return;
-    });
+    // // .catch(function() {
+    //     displayAlertMessage("We're sorry! We were unable to connect to OpenWeathermap.org");
+    //     return;
+    // }));
 };
+function formatDate(strDate){
+
+    let newDate = strDate.split(" ")[0].split("-");
+
+    return (newDate[1]+"/"+newDate[2]+"/"+newDate[0]);
+};
+
+//This function is designed to create the array of object to store the weather information 
+function createDataObject(list, position) {
+    if (weatherCondition.length)
+    weatherCondition = [];
+
+    let object = {
+        dateT : formatDate(list[0].dt_txt),
+        humidity : list[0].main.humidity,
+        speed: list[0].wind.speed,
+        temp: list[0].main.temp,
+        icon : urlIcon + list[0].weather[0].icon + ".png",
+        lat : position.lat,
+        lon: position.lon
+    };
+    weatherCondition.push(object);
+    for (let i = 1; i < list.length; i++) {
+        if (searchForDate9AM(list[i].dt_txt)) {
+            object = {
+                dateT : formatDate(list[i].dt_txt),
+                humidity : list[i].main.humidity,
+                speed: list[i].wind.speed,
+                temp: list[i].main.temp,
+                icon : urlIcon + list[i].weather[0].icon + ".png",
+                lat : position.lat,
+                lon: position.lon
+            };
+            weatherCondition.push(object);
+        }
+    }
+};
+
+//This function is designed to display all messages generated in the application
+function displayAlertMessage(msg) {
+    alert(msg);
+};
+
+//This function is designed to listen on the clicked button
+$("#searchButton").click(function search(event) {
+    event.preventDefault();
+    let inputElement = document.querySelector("#searchCity");
+    let textInput = inputElement.value
+
+    if (inputElement.value === "") {
+        alert("Weather Dashbord\n   You must enter a City");
+        return;
+    }
+    else{
+        fetchAPI(textInput);
+    }
+});
+begin();

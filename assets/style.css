@@ -1,2 +1,9 @@
 /*Font-family imports for styling of Comfortaa*/
 @import url('https://fonts.googleapis.com/css2?family=Comfortaa&display=swap');
+
+* {
+    color: aqua;
+}
+#searchCity {
+    color: #050505;
+}
